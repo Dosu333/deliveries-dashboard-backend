@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: starter-api
+          image: profmcdan/django-starter-api:v0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: user
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: db_name
+
+            - name: ACCESS_KEY_AWS
+              valueFrom:
+                secretKeyRef:
+                  name: api-credentials
+                  key: aws_access_key
+
+            - name: ACCESS_SECRET_AWS
+              valueFrom:
+                secretKeyRef:
+                  name: api-credentials
+                  key: aws_secret_key
+
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-credentials
+                  key: sendgrid_api_key
+
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: api-credentials
+                  key: database_url
+
+            - name: ACCESS_BUCKET_NAME_AWS
+              value: "pr-dev-bucket"
+            - name: SENTRY_DSN
+              value: "https://edc5711bb6d9401bae96a110d8986d56@o561457.ingest.sentry.io/5964132"
+            - name: SMTP_HOST
+              value: "smtp.sendgrid.net"
+            - name: SENDER_EMAIL
+              value: "admin@prunedge.com"
+            - name: DEBUG
+              value: "1"
+            - name: DB_HOST
+              value: postgres-service
+            - name: DB_PORT
+              value: "5432"
+            - name: REDIS_HOST
+              value: redis-service
+            - name: REDIS_PORT
+              value: "6379"
+            - name: APP_NAME
+              value: starter-api
+            - name: SQL_ENGINE
+              value: django.db.backends.postgresql
+            - name: CLIENT_URL
+              value: http://localhost:3000
+
+
+
+
