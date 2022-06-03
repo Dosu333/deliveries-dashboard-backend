@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", 1))
 
-ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "api", "api.swiftjet.prunedge.org"]
+ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "delivery.boxin.ng"]
 INTERNAL_IPS = ["127.0.0.1"]
 if DEBUG:
     import os  # only if you haven't already imported this
@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'health_check.contrib.psutil',              # disk and memory utilization; requires psutil
     'health_check.contrib.s3boto3_storage',
     'health_check.contrib.redis',
-    'debug_toolbar',
+    # 'debug_toolbar',
     'drf_spectacular',
     'core.celery.CeleryConfig',
     'user',
@@ -76,9 +76,13 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "user.User"
 
+FCM_DJANGO_SETTINGS = {
+    "FCM_SERVER_KEY": os.environ.get('FCM_KEY')
+}
+
 MIDDLEWARE = [
     # 'django_prometheus.middleware.PrometheusBeforeMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -185,7 +189,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     # 'DATE_INPUT_FORMATS': ["%d/%m/%Y", ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTTokenUserAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
@@ -193,6 +197,10 @@ REST_FRAMEWORK = {
     # 'EXCEPTION_HANDLER': 'core.utils.custom_exception_handler'
 }
 
+
+SIMPLE_JWT = {
+    'SIGNING_KEY': os.environ.get('SIGNING_KEY'),
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -216,7 +224,7 @@ AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')
 AWS_ACCESS_KEY_ID = os.environ.get('ACCESS_KEY_AWS')
 AWS_SECRET_ACCESS_KEY = os.environ.get('ACCESS_SECRET_AWS')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('ACCESS_BUCKET_NAME_AWS')
-AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
+# AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
 AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
@@ -238,7 +246,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs/debug.log'
+            'filename': os.path.join(BASE_DIR, 'logs/debug.log')
         },
     },
     'loggers': {
@@ -343,11 +351,11 @@ SPECTACULAR_SETTINGS = {
         "displayRequestDuration": True
     },
     'UPLOADED_FILES_USE_URL': True,
-    'TITLE': 'Prowoks Application API',
-    'DESCRIPTION': 'Prowoks API Doc',
+    'TITLE': 'Delivery Dashboard Application API',
+    'DESCRIPTION': 'Delivery Dashboard API Doc',
     'VERSION': '1.0.0',
     'LICENCE': {'name': 'BSD License'},
-    'CONTACT': {'name': 'Daniel Ale', 'email': 'daniel.ale@prunedge.com'},
+    'CONTACT': {'name': 'Boxin Tech', 'email': 'backstage@boxin.ng'},
 
     # Oauth2 related settings. used for example by django-oauth2-toolkit.
     # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#oauth-flows-object

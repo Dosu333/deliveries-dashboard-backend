@@ -152,3 +152,13 @@ class CreateTokenView(ObtainAuthToken):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': str(e)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TestView(views.APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            msg = 'It worked'
+            return Response({'message':msg}, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': str(e)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
