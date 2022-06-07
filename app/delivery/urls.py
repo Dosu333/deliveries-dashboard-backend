@@ -10,4 +10,5 @@ router.register('delivery', OffStoreDeliveryViewSet)
 
 urlpatterns = [
     path('verify-transaction/', VerifyTransaction.as_view(), name='verify-transaction'),
+    path('deliveries/', DeliveriesView.as_view(), name='deliveries'),
 ]

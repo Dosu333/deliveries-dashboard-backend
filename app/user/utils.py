@@ -21,3 +21,12 @@ def get_user_data(user_id):
     res = requests.get(url, verify=False)
     user = res.json()
     return user
+
+def get_user_store_orders(user_id):
+    url = f"https://api.boxin.ng/api/v1/store/store-orders/?user={user_id}/"
+    res = requests.get(url, verify=False)
+    orders = res.json()
+
+    if orders['success']:
+        return orders['orders']
+    return None
