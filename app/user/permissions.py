@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from django.contrib.auth import get_user_model
+from .utils import get_user_data
 import os, requests
 
 
@@ -8,10 +9,8 @@ class IsSuperAdmin(permissions.BasePermission):
     message = "Only Super Admins are authorized to perform this action."
 
     def has_permission(self, request, view):
-        url = f"{os.environ.get('AUTH_URL')}/{request.user.id}/"
-        res = requests.get(url, verify=False)
-        user = res.json()
-        return bool(request.user and user['roles'] and 'SUPERADMIN' in user['roles'])
+        user = get_user_data(request.user.id)
+        return bool(user and user['roles'] and 'SUPERADMIN' in user['roles'])
 
 
 class IsAdmin(permissions.BasePermission):
@@ -19,10 +18,8 @@ class IsAdmin(permissions.BasePermission):
     message = "Only Admins are authorized to perform this action."
 
     def has_permission(self, request, view):
-        url = f"{os.environ.get('AUTH_URL')}/{request.user.id}/"
-        res = requests.get(url, verify=False)
-        user = res.json()
-        return bool(request.user and user['roles'] and 'ADMIN' in user['roles'])
+        user = get_user_data(request.user.id)
+        return bool(user and user['roles'] and 'ADMIN' in user['roles'])
 
 
 class IsRegularUser(permissions.BasePermission):
@@ -30,7 +27,5 @@ class IsRegularUser(permissions.BasePermission):
     message = "Only Regular users are authorized to perform this action."
 
     def has_permission(self, request, view):
-        url = f"{os.environ.get('AUTH_URL')}/{request.user.id}/"
-        res = requests.get(url, verify=False)
-        user = res.json()
-        return bool(request.user and user['roles'] and 'REGULAR' in user['roles']) 
+        user = get_user_data(request.user.id)
+        return bool(user and user['roles'] and 'REGULAR' in user['roles']) 
