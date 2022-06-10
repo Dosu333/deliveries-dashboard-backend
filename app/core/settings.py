@@ -43,7 +43,7 @@ if DEBUG:
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_TRUSTED_ORIGINS = ['https://delivery.boxin.ng','http://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://delivery.boxin.ng','http://127.0.0.1', 'https://52.188.158.17']
 
 # Application definition
 
