@@ -23,7 +23,7 @@ def get_user_data(user_id):
     return user
 
 def get_user_store_orders(user_id):
-    url = f"https://api.boxin.ng/api/v1/store/store-orders/?user={user_id}/"
+    url = f"https://api.boxin.ng/api/v1/store/store-orders/?user={user_id}"
     res = requests.get(url, verify=False)
     orders = res.json()
 
