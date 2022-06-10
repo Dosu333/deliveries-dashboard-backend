@@ -9,7 +9,7 @@ import os, requests
 
 
 class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
-    queryset = OffStoreDelivery
+    queryset = OffStoreDelivery.objects.all()
     serializer_class = OffStoreDeliverySerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = [filters.SearchFilter, ]

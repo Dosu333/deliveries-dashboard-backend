@@ -6,9 +6,10 @@ from .views import *
 app_name = 'delivery'
 
 router = DefaultRouter()
-router.register('delivery', OffStoreDeliveryViewSet)
+router.register('offstore', OffStoreDeliveryViewSet)
 
 urlpatterns = [
+    path('', include(router.urls)),
     path('verify-transaction/', VerifyTransaction.as_view(), name='verify-transaction'),
-    path('deliveries/', DeliveriesView.as_view(), name='deliveries'),
+    path('total-deliveries/', DeliveriesView.as_view(), name='deliveries'),
 ]

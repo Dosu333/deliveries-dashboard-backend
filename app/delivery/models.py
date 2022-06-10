@@ -23,7 +23,7 @@ class OffStoreDelivery(models.Model):
     customer_email = models.EmailField(blank=True, null=True)
     customer_phone = models.CharField(max_length=14, blank=True, null=True)
     number_of_items = models.IntegerField(blank=True, null=True)
-    amount_paid =  models.DecimalField(decimal_places=2, blank=True, null=True)
+    amount_paid =  models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     transaction_reference = models.CharField(max_length=225, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
