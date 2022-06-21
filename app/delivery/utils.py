@@ -1,3 +1,4 @@
+from turtle import distance
 import requests
 import os
 
@@ -11,5 +12,7 @@ def distance_matrix(merchant_address, consumer_address):
     return float(dist)
 
 
-def calculate_shipping_fee(merchant_address, consumer_address, weight_range, merchant_state, consumer_state):
-    pass
+def calculate_shipping_fee(merchant_address, consumer_address, weight_range, merchant_state, receiver_state):
+    
+    if merchant_state == receiver_state:
+        pass

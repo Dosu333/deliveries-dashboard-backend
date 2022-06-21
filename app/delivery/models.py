@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 import uuid
 
 
@@ -25,10 +26,17 @@ class OffStoreDelivery(models.Model):
     number_of_items = models.IntegerField(blank=True, null=True)
     amount_paid =  models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     transaction_reference = models.CharField(max_length=225, blank=True, null=True)
+    pickup_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.company_id
+        return self.business_id
+
+# class DeliveryRate(models.Model):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     states = ArrayField(models.CharField(max_length=50, null=True, blank=True))
+#     interstate_small_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+#     interstate_large_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
