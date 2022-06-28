@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.utils.crypto import get_random_string
 import uuid
 
 
@@ -24,8 +25,9 @@ class OffStoreDelivery(models.Model):
     customer_email = models.EmailField(blank=True, null=True)
     customer_phone = models.CharField(max_length=14, blank=True, null=True)
     number_of_items = models.IntegerField(blank=True, null=True)
+    additional_notes = models.CharField(max_length=225, blank=True, null=True)
     amount_paid =  models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    transaction_reference = models.CharField(max_length=225, blank=True, null=True)
+    transaction_reference = models.CharField(max_length=225, blank=True, null=True, default=uuid.uuid4, unique=True)
     pickup_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
