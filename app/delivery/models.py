@@ -14,6 +14,14 @@ class OffStoreDelivery(models.Model):
         ('25kg - 30kg', '25kg - 30kg'),
     ]
 
+    STATUS_CHOICES = [
+        ('AWAITING_PAYMENT', 'AWAITING_PAYMENT'),
+        ('PENDING', 'PENDING'),
+        ('PICKED_UP', 'PICKED_UP'),
+        ('IN_TRANSIT', 'IN_TRANSIT'),
+        ('COMPLETED', 'COMPLETED')
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     destination_address = models.CharField(max_length=225, blank=True, null=True)
     destination_state = models.CharField(max_length=225, blank=True, null=True)
@@ -27,6 +35,7 @@ class OffStoreDelivery(models.Model):
     number_of_items = models.IntegerField(blank=True, null=True)
     additional_notes = models.CharField(max_length=225, blank=True, null=True)
     amount_paid =  models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, null=True, blank=True, default='AWAITING_PAYMENT')
     transaction_reference = models.CharField(max_length=225, blank=True, null=True, default=uuid.uuid4, unique=True)
     pickup_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -37,8 +46,15 @@ class OffStoreDelivery(models.Model):
     def __str__(self):
         return self.business_id
 
-# class DeliveryRate(models.Model):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     states = ArrayField(models.CharField(max_length=50, null=True, blank=True))
-#     interstate_small_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-#     interstate_large_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+class DeliveryRate(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    states = ArrayField(models.CharField(max_length=50, null=True, blank=True))
+    interstate_small_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    intrastate_small_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    intrastate_large_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    interstate_large_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    min_interstate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    max_interstate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    min_intrastate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    max_intrastate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    

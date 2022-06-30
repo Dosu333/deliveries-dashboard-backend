@@ -12,4 +12,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('verify-transaction/', VerifyTransaction.as_view(), name='verify-transaction'),
     path('total-deliveries/', DeliveriesView.as_view(), name='deliveries'),
+    path('shipping-fee/', get_shipping_fee, name='shipping-fee')
 ]
