@@ -31,6 +31,8 @@ class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
 
 
 class DeliveriesView(views.APIView):
+    """Get offstore and instore orders of user"""
+    
     permission_classes = [IsAuthenticated, ]
     serializer_class = OffStoreDeliverySerializer
 
