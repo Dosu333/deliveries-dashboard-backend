@@ -1,4 +1,3 @@
-from turtle import distance
 from .models import DeliveryRate
 import requests
 import os
