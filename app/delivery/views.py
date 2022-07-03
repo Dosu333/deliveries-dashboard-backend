@@ -26,8 +26,14 @@ class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
     search_fields = ['customer_name', 'customer_email',
                      'customer_phone', 'destination_state', 'pickup_state']
 
-    def get_queryset(self, request, *args, **kwargs):
-        return self.queryset.filter(business_id=request.user.id)
+    def get_queryset(self):
+        return self.queryset.filter(business_id=self.request.user.id)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        obj = self.queryset.get(pk=instance.id)
+        obj.business_id = self.request.user.id
+        obj.save()
 
 
 class DeliveriesView(views.APIView):
