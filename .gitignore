@@ -17,4 +17,4 @@ app/logs/debug.log
 app/logs/celery.log
 .env
 /k8s/secrets/
-/app/delivery/shipping_fee/Tariff_Zoning_location .xlsx
+# /app/delivery/shipping_fee/Tariff_Zoning_location .xlsx
