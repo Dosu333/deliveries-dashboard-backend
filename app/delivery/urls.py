@@ -11,6 +11,6 @@ router.register('offstore', OffStoreDeliveryViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('verify-transaction/', VerifyTransaction.as_view(), name='verify-transaction'),
-    path('total-deliveries/', DeliveriesView.as_view(), name='deliveries'),
-    path('shipping-fee/', get_shipping_fee, name='shipping-fee')
+    path('instore/', GetStoreDeliveriesView.as_view(), name='deliveries'),
+    path('shipping-fee/', GetShippingFee.as_view(), name='shipping-fee')
 ]

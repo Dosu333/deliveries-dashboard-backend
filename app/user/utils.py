@@ -23,10 +23,11 @@ def get_user_data(user_id):
     return user
 
 def get_user_store_orders(user_id):
-    url = f"https://api.boxin.ng/api/v1/store/store-orders/?user={user_id}"
+    url = f"https://api.boxin.ng/api/v1/store/store-orders/?user={user_id}&page_size=10"
     res = requests.get(url, verify=False)
     orders = res.json()
+    order_success = orders.get('success', None)
 
-    if orders['success']:
-        return orders['orders']
+    if not order_success:
+        return orders
     return None

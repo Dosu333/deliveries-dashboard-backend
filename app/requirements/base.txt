@@ -39,4 +39,7 @@ selenium==4.1.0
 django-health-check==3.16.5
 psutil==5.9.0
 fcm-django
+pandas
+numpy
+openpyxl
 # django-debug-toolbar==3.2.4

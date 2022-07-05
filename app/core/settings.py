@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'health_check.contrib.s3boto3_storage',
     'health_check.contrib.redis',
     # 'debug_toolbar',
+    'rest_framework',
     'drf_spectacular',
     'core.celery.CeleryConfig',
     'user',

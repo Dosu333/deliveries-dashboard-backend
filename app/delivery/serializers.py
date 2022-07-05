@@ -20,3 +20,10 @@ class OffStoreDeliverySerializer(serializers.ModelSerializer):
             except EmailNotValidError as e:
                 raise serializers.ValidationError(e)
         return super().validate(attrs)
+
+
+class ShippingVariablesSerializer(serializers.Serializer):
+    merchant_state = serializers.CharField(required=True)
+    receiver_state = serializers.CharField(required=True)
+    weight = serializers.DecimalField(max_digits=4, decimal_places=1, required=True)
+    shipping_type = serializers.CharField(required=True)

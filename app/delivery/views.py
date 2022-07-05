@@ -2,23 +2,39 @@ from rest_framework import views, viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
 from user.utils import get_user_data, get_user_store_orders
-from .utils import calculate_shipping_fee
+from .shipping_fee.shipping import calculate_shipping_fee
 from .models import *
 from .serializers import *
 import os
 import requests
 
 
-@api_view
-def get_shipping_fee(request):
-    if not request.data['items']:
-        fee = calculate_shipping_fee(
-            weight_range=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'])
-        return Response({'success': True, 'shipping_fee': fee['shipping_fee']}, status=status.HTTP_200_OK)
+class GetShippingFee(views.APIView):
+    """"Get shipping fee for offstore and store deliveries"""
+    serializer_class = ShippingVariablesSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            items = request.data.get('items', None)
+            if not items:
+                serializer = self.serializer_class(data=request.data)
+                if serializer.is_valid():
+                    fee = calculate_shipping_fee(
+                        total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], shipping_type=request.data['shipping_type'])
+                    
+                    if fee['success']:
+                        return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
+                    return Response({'success': False, 'shipping_fee': fee['fee'], 'error':fee['message']}, status=status.HTTP_200_OK)
+                return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
+    """Offstore orders viewsets"""
+
     queryset = OffStoreDelivery.objects.all()
     serializer_class = OffStoreDeliverySerializer
     permission_classes = [IsAuthenticated, ]
@@ -36,19 +52,16 @@ class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
         obj.save()
 
 
-class DeliveriesView(views.APIView):
-    """Get offstore and instore orders of user"""
-    
+class GetStoreDeliveriesView(views.APIView):
+    """Get instore orders of user"""
+
     permission_classes = [IsAuthenticated, ]
-    serializer_class = OffStoreDeliverySerializer
 
     def get(self, request, *args, **kwargs):
         try:
-            offstore = OffStoreDelivery.objects.filter(
-                business_id=request.user.id)
-            offstore_data = self.serializer_class(offstore, many=True)
             store_orders = get_user_store_orders(request.user.id)
-            return Response({'success': True, 'offstore_orders': offstore_data, 'store_orders': store_orders}, status=status.HTTP_200_OK)
+            if store_orders:
+                return Response(store_orders, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
