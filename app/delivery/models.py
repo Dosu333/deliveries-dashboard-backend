@@ -23,7 +23,7 @@ class OffStoreDelivery(models.Model):
     destination_state = models.CharField(max_length=225)
     pickup_address = models.CharField(max_length=225)
     pickup_state = models.CharField(max_length=225)
-    total_weight = models.DecimalField(max_digits=4, decimal_places=1)
+    total_weight = models.DecimalField(max_digits=4, decimal_places=1, default=0.0)
     business_id = models.UUIDField(blank=True, null=True)
     customer_name = models.CharField(max_length=225)
     customer_email = models.EmailField(blank=True, null=True)
