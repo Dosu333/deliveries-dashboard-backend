@@ -34,7 +34,7 @@ class TrackDeliverySerializer(serializers.Serializer):
     delivery_id = serializers.UUIDField(required=True)
 
     def validate(self, attrs):
-        request_from = attrs.get('app', None)
+        request_from = attrs.get('type', None)
 
         if request_from and request_from not in ['store', 'offstore']:
             raise serializers.ValidationError('Invalid delivery type.')
