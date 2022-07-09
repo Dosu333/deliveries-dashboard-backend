@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from user.utils import get_user_data, get_user_store_orders
 from .shipping_fee.shipping import calculate_shipping_fee
+from .utils import split_datetime_object
 from .models import *
 from .serializers import *
 import os
@@ -28,6 +29,38 @@ class GetShippingFee(views.APIView):
                         return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
                     return Response({'success': False, 'shipping_fee': fee['fee'], 'error':fee['message']}, status=status.HTTP_200_OK)
                 return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TrackDeliveryView(views.APIView):
+    """Track instore and offstore deliveries"""
+    serializer_class = TrackDeliverySerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            checkpoint_data = ['order_placed_at', 'dispatched_at', 'intransit_at', 'delivered_at']
+            checkpoints = []
+
+            if serializer.is_valid():
+                if serializer.data['type'] == 'offstore':
+                    delivery = OffStoreDelivery.objects.get(id=str(serializer.data['delivery_id']))
+                    delivey_data = OffStoreDeliverySerializer(delivery)
+
+                    for checkpoint in checkpoint_data:
+                        checkpoints.append({'status': checkpoint[:-3], 'date_time': split_datetime_object(delivey_data[checkpoint])})
+                    return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
+
+                if serializer.data['type'] == 'store':
+                    url = f"https://api.boxin.ng/api/v1/store/orders/{serializer.data['delivery_id']}/"
+                    res = requests.get(url, verify=False)
+                    response = res.json()
+                    
+                    for checkpoint in checkpoint_data:
+                        checkpoints.append({'status': checkpoint[:-3], 'date_time': split_datetime_object(response[checkpoint])})
+                    return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
+            return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

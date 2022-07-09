@@ -1,4 +1,5 @@
 from .models import DeliveryRate
+from datetime import datetime
 import requests
 import os
 
@@ -44,3 +45,12 @@ def calculate_shipping_fee(weight_range, merchant_state, receiver_state):
         return {'shipping_fee': float(3000.00)}
     except Exception as e:
         return {'shipping_fee': float(3000.00)}
+
+
+def split_datetime_object(datetime_object):
+    if datetime_object and type(datetime_object) is not dict:
+        datetime_object = datetime_object.split('+')
+        date = datetime.strptime(datetime_object[0].split('T')[0], '%Y-%m-%d')
+        time_obj = datetime.strptime(datetime_object[0].split('T')[1], '%H:%M:%S.%f')
+        return {'date': date.strftime('%d/%m/%Y'), 'time':time_obj.strftime("%I:%M %p")}
+    return datetime_object

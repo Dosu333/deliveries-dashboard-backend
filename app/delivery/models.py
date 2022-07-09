@@ -19,6 +19,7 @@ class OffStoreDelivery(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    delivery_type = models.CharField(max_length=10, default='offstore')
     destination_address = models.CharField(max_length=225)
     destination_state = models.CharField(max_length=225)
     pickup_address = models.CharField(max_length=225)
@@ -35,10 +36,13 @@ class OffStoreDelivery(models.Model):
     shipping_type = models.CharField(max_length=20, choices=SHIPPING_TYPE_CHOICES, null=True, blank=True, default='NORMAL')
     transaction_reference = models.CharField(max_length=225, blank=True, null=True, default=uuid.uuid4, unique=True)
     pickup_time = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    dispatched_at = models.DateTimeField(blank=True, null=True)
+    intransit_at = models.DateTimeField(blank=True, null=True)
+    delivered_at = models.DateTimeField(blank=True, null=True)
+    order_placed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-order_placed_at']
 
     def __str__(self):
         return str(self.business_id)

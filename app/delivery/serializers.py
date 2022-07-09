@@ -27,3 +27,15 @@ class ShippingVariablesSerializer(serializers.Serializer):
     receiver_state = serializers.CharField(required=True)
     weight = serializers.DecimalField(max_digits=4, decimal_places=1, required=True)
     shipping_type = serializers.CharField(required=True)
+
+
+class TrackDeliverySerializer(serializers.Serializer):
+    type = serializers.CharField(required=True)
+    delivery_id = serializers.UUIDField(required=True)
+
+    def validate(self, attrs):
+        request_from = attrs.get('app', None)
+
+        if request_from and request_from not in ['store', 'offstore']:
+            raise serializers.ValidationError('Invalid delivery type.')
+        return super().validate(attrs)
