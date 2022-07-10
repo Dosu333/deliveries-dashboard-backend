@@ -83,7 +83,22 @@ class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
         obj = self.queryset.get(pk=instance.id)
         obj.business_id = self.request.user.id
         obj.save()
+        
 
+class UpdateOffstoreDeliveryView(views.APIView):
+    """Update status of delivery"""
+    def get(self, request,*args, **kwargs):
+        ref = request.query_params.get('ref', None)
+        try:
+            if ref:
+                delivery = OffStoreDelivery.objects.get(transaction_reference=ref)
+                delivery.status = 'PENDING'
+                delivery.save()
+                return Response({'success': True}, status=status.HTTP_200_OK)
+            return Response({'success': False, 'error': 'No transaction references'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
 
 class GetStoreDeliveriesView(views.APIView):
     """Get instore orders of user"""
