@@ -116,11 +116,10 @@ class GetStoreDeliveriesView(views.APIView):
 
 class VerifyTransaction(views.APIView):
     url = 'https://api.paystack.co/transaction/verify/'
-    serializer_class = OffStoreDeliverySerializer
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         ref = self.request.query_params.get('reference', None)
-        serializer = self.serializer_class(data=request.data)
+        # serializer = self.serializer_class(data=request.data)
 
         if ref is not None:
             self.url = self.url + ref
@@ -132,13 +131,16 @@ class VerifyTransaction(views.APIView):
                 response = r.json()
 
                 if response['status']:
-                    if serializer.is_valid():
-                        if OffStoreDelivery.objects.filter(transaction_reference=ref).count() < 1:
-                            serializer.save()
-                        else:
-                            return Response({'success': False, 'errors': "Delivery exists and previously paid for"}, status=status.HTTP_400_BAD_REQUEST)
-                    else:
-                        return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                    delivery = OffStoreDelivery.objects.get(transaction_reference=ref) 
+                    delivery.status = 'PENDING'
+                    delivery.save()
+                    # if serializer.is_valid():
+                    #     if OffStoreDelivery.objects.filter(transaction_reference=ref).count() < 1:
+                    #         serializer.save()
+                    #     else:
+                    #         return Response({'success': False, 'errors': "Delivery exists and previously paid for"}, status=status.HTTP_400_BAD_REQUEST)
+                    # else:
+                    #     return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
                     if response['data']['status'] == 'success':
                         return Response({'success': True}, status=status.HTTP_200_OK)

@@ -2,6 +2,7 @@ from attr import field
 from rest_framework import serializers
 from email_validator import validate_email, EmailNotValidError
 from .models import *
+from .utils import split_datetime_object
 
 
 class OffStoreDeliverySerializer(serializers.ModelSerializer):
@@ -20,6 +21,14 @@ class OffStoreDeliverySerializer(serializers.ModelSerializer):
             except EmailNotValidError as e:
                 raise serializers.ValidationError(e)
         return super().validate(attrs)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['pickup_time'] = split_datetime_object(representation['pickup_time'])
+        representation['dispatched_at'] = split_datetime_object(representation['dispatched_at'])
+        representation['intransit_at'] = split_datetime_object(representation['intransit_at'])
+        representation['order_placed_at'] = split_datetime_object(representation['order_placed_at'])
+        return representation
 
 
 class ShippingVariablesSerializer(serializers.Serializer):
