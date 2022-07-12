@@ -12,7 +12,6 @@ class OffStoreDelivery(models.Model):
 
     STATUS_CHOICES = [
         ('AWAITING PAYMENT', 'AWAITING PAYMENT'),
-        ('PAYMENT FAILED', 'PAYMENT FAILED')
         ('PENDING', 'PENDING'),
         ('PICKED_UP', 'PICKED_UP'),
         ('IN_TRANSIT', 'IN_TRANSIT'),
