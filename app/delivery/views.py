@@ -49,7 +49,7 @@ class TrackDeliveryView(views.APIView):
                     delivey_data = OffStoreDeliverySerializer(delivery).data
 
                     for checkpoint in checkpoint_data:
-                        checkpoints.append({'status': checkpoint[:-3], 'date_time': split_datetime_object(delivey_data[checkpoint])})
+                        checkpoints.append({'status': checkpoint[:-3], 'date_time': delivey_data[checkpoint]})
                     return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
 
                 if serializer.data['type'] == 'store':
