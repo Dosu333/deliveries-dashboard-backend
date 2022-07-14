@@ -10,6 +10,7 @@ class OffStoreDeliverySerializer(serializers.ModelSerializer):
     pickup_time = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     intransit_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
     dispatched_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
+    delivered_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
 
     class Meta:
         model = OffStoreDelivery
