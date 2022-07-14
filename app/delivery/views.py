@@ -58,7 +58,7 @@ class TrackDeliveryView(views.APIView):
                     response = res.json()
                     
                     for checkpoint in checkpoint_data:
-                        checkpoints.append({'status': checkpoint[:-3], 'date_time': split_datetime_object(response[checkpoint])})
+                        checkpoints.append({'status': checkpoint[:-3], 'date_time': response[checkpoint]})
                     return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
             return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
