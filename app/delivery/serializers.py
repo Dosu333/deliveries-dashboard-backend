@@ -7,7 +7,7 @@ from .utils import split_datetime_object
 
 class OffStoreDeliverySerializer(serializers.ModelSerializer):
     order_placed_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
-    pickup_time = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    # pickup_time = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     intransit_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
     dispatched_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
     delivered_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
