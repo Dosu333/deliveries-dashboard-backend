@@ -9,7 +9,7 @@ add_price_df = pd.read_excel(filepath, sheet_name=5)
 intrastate_states = ['ibadan', 'ife', 'oshogbo']
 
 def calculate_shipping_fee(merchant_state, receiver_state, total_weight, shipping_type='NORMAL'):
-    if (merchant_state.lower() != receiver_state.lower()) or (merchant_state.lower() == 'lagos'):
+    if (merchant_state.lower() != receiver_state.lower()) or (merchant_state.lower() == 'lagos') or (merchant_state.lower() == receiver_state.lower() and merchant_state.lower() not in intrastate_states):
         zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.upper(), receiver_state.upper()].tolist()
         
         try:
@@ -27,7 +27,7 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, shippin
             return {'success': True, 'fee': price[0] + (0.3*price[0])}
         return {'success': False, 'fee':0, 'message': "We do not yet fufill express deliveries within this location. We're working hard to be in your city soon" }
 
-    elif (merchant_state.lower() == receiver_state.lower()) and (merchant_state in intrastate_states):
+    elif (merchant_state.lower() == receiver_state.lower()) and (merchant_state.lower() in intrastate_states):
         return {'success': True, 'fee':700}
     else:
-        return {'success': True, 'fee': price[0] + (0.1*price[0])}
+        return {'success': False, 'fee':0, 'message': "We do not yet fufill express deliveries within this location. We're working hard to be in your city soon" }
