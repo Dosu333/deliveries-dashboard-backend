@@ -28,6 +28,6 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, shippin
         return {'success': False, 'fee':0, 'message': "We do not yet fufill express deliveries within this location. We're working hard to be in your city soon" }
 
     elif (merchant_state.lower() == receiver_state.lower()) and (merchant_state in intrastate_states):
-        return {'success': True, 'fee':700}
+        return {'success': True, 'fee':850}
     else:
         return {'success': True, 'fee': price[0] + (0.1*price[0])}
