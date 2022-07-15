@@ -89,10 +89,12 @@ class UpdateOffstoreDeliveryView(views.APIView):
     """Update status of delivery"""
     def get(self, request,*args, **kwargs):
         ref = request.query_params.get('ref', None)
+        amount = request.query_params.get('amount', None)
         try:
             if ref:
                 delivery = OffStoreDelivery.objects.get(transaction_reference=ref)
                 delivery.status = 'PENDING'
+                delivery.amount_paid = float(amount)/100
                 delivery.save()
                 return Response({'success': True}, status=status.HTTP_200_OK)
             return Response({'success': False, 'error': 'No transaction references'}, status=status.HTTP_400_BAD_REQUEST)
@@ -119,7 +121,6 @@ class VerifyTransaction(views.APIView):
 
     def get(self, request, *args, **kwargs):
         ref = self.request.query_params.get('reference', None)
-        # serializer = self.serializer_class(data=request.data)
 
         if ref is not None:
             self.url = self.url + ref
