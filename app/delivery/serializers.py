@@ -32,6 +32,8 @@ class OffStoreDeliverySerializer(serializers.ModelSerializer):
 class ShippingVariablesSerializer(serializers.Serializer):
     merchant_state = serializers.CharField(required=True)
     receiver_state = serializers.CharField(required=True)
+    merchant_address = serializers.CharField(required=False)
+    receiver_address = serializers.CharField(required=False)
     weight = serializers.DecimalField(max_digits=4, decimal_places=1, required=True)
     shipping_type = serializers.CharField(required=True)
 

@@ -20,14 +20,17 @@ class GetShippingFee(views.APIView):
         try:
             items = request.data.get('items', None)
             if not items:
+                merchant_address = request.data.get('merchant_address', None)
+                receiver_address = request.data.get('receiver_address', None)
+
                 serializer = self.serializer_class(data=request.data)
                 if serializer.is_valid():
                     fee = calculate_shipping_fee(
-                        total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], shipping_type=request.data['shipping_type'])
-                    
+                        total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'])
+
                     if fee['success']:
                         return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
-                    return Response({'success': False, 'shipping_fee': fee['fee'], 'error':fee['message']}, status=status.HTTP_200_OK)
+                    return Response({'success': False, 'shipping_fee': fee['fee'], 'error': fee['message']}, status=status.HTTP_200_OK)
                 return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -40,25 +43,29 @@ class TrackDeliveryView(views.APIView):
     def post(self, request, *args, **kwargs):
         try:
             serializer = self.serializer_class(data=request.data)
-            checkpoint_data = ['order_placed_at', 'dispatched_at', 'intransit_at', 'delivered_at']
+            checkpoint_data = ['order_placed_at',
+                               'dispatched_at', 'intransit_at', 'delivered_at']
             checkpoints = []
 
             if serializer.is_valid():
                 if serializer.data['type'] == 'offstore':
-                    delivery = OffStoreDelivery.objects.get(id=str(serializer.data['delivery_id']))
+                    delivery = OffStoreDelivery.objects.get(
+                        id=str(serializer.data['delivery_id']))
                     delivey_data = OffStoreDeliverySerializer(delivery).data
 
                     for checkpoint in checkpoint_data:
-                        checkpoints.append({'status': checkpoint[:-3], 'date_time': delivey_data[checkpoint]})
+                        checkpoints.append(
+                            {'status': checkpoint[:-3], 'date_time': delivey_data[checkpoint]})
                     return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
 
                 if serializer.data['type'] == 'store':
                     url = f"https://api.boxin.ng/api/v1/store/orders/{serializer.data['delivery_id']}/"
                     res = requests.get(url, verify=False)
                     response = res.json()
-                    
+
                     for checkpoint in checkpoint_data:
-                        checkpoints.append({'status': checkpoint[:-3], 'date_time': response[checkpoint]})
+                        checkpoints.append(
+                            {'status': checkpoint[:-3], 'date_time': response[checkpoint]})
                     return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
             return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -83,16 +90,18 @@ class OffStoreDeliveryViewSet(viewsets.ModelViewSet):
         obj = self.queryset.get(pk=instance.id)
         obj.business_id = self.request.user.id
         obj.save()
-        
+
 
 class UpdateOffstoreDeliveryView(views.APIView):
     """Update status of delivery"""
-    def get(self, request,*args, **kwargs):
+
+    def get(self, request, *args, **kwargs):
         ref = request.query_params.get('ref', None)
         amount = request.query_params.get('amount', None)
         try:
             if ref:
-                delivery = OffStoreDelivery.objects.get(transaction_reference=ref)
+                delivery = OffStoreDelivery.objects.get(
+                    transaction_reference=ref)
                 delivery.status = 'PENDING'
                 delivery.amount_paid = float(amount)/100
                 delivery.save()
@@ -100,7 +109,7 @@ class UpdateOffstoreDeliveryView(views.APIView):
             return Response({'success': False, 'error': 'No transaction references'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+
 
 class GetStoreDeliveriesView(views.APIView):
     """Get instore orders of user"""
@@ -132,9 +141,11 @@ class VerifyTransaction(views.APIView):
                 response = r.json()
 
                 if response['status']:
-                    delivery = OffStoreDelivery.objects.get(transaction_reference=ref) 
+                    delivery = OffStoreDelivery.objects.get(
+                        transaction_reference=ref)
                     delivery.status = 'PENDING'
-                    delivery.amount_paid = float(response['data']['amount']) / 100
+                    delivery.amount_paid = float(
+                        response['data']['amount']) / 100
                     delivery.save()
                     # if serializer.is_valid():
                     #     if OffStoreDelivery.objects.filter(transaction_reference=ref).count() < 1:

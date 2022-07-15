@@ -3,6 +3,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils.crypto import get_random_string
 import uuid
 
+from numpy import maximum
+
 
 class OffStoreDelivery(models.Model):
     SHIPPING_TYPE_CHOICES = [
@@ -49,13 +51,8 @@ class OffStoreDelivery(models.Model):
 
 class DeliveryRate(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    states = ArrayField(models.CharField(max_length=50, null=True, blank=True))
-    interstate_small_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    intrastate_small_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    intrastate_large_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    interstate_large_size_rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    min_interstate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    max_interstate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    min_intrastate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    max_intrastate_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    states = ArrayField(models.CharField(max_length=50, null=True, blank=True), null=True, blank=True)
+    mininum_fee = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+    rate = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
+    extra_size_fee = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     
