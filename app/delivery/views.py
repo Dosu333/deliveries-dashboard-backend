@@ -134,7 +134,7 @@ class VerifyTransaction(views.APIView):
         if ref is not None:
             self.url = self.url + ref
             headers_dict = {'Authorization': "Bearer {}".format(
-                os.environ.get('PAYSTACK_TEST_SECRET_KEY'))}
+                os.environ.get('PAYSTACK_SECRET_KEY'))}
 
             try:
                 r = requests.get(self.url, headers=headers_dict)
