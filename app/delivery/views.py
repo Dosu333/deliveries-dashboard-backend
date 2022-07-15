@@ -133,7 +133,7 @@ class VerifyTransaction(views.APIView):
                 if response['status']:
                     delivery = OffStoreDelivery.objects.get(transaction_reference=ref) 
                     delivery.status = 'PENDING'
-                    delivery.amount_paid = int(response['data']['amount']) / 100
+                    delivery.amount_paid = float(response['data']['amount']) / 100
                     delivery.save()
                     # if serializer.is_valid():
                     #     if OffStoreDelivery.objects.filter(transaction_reference=ref).count() < 1:
