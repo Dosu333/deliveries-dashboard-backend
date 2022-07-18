@@ -152,7 +152,7 @@ class VerifyTransaction(views.APIView):
 
                     user = get_user_data(obj.business_id)
                     from_whatsapp_number = 'whatsapp:+14155238886'
-                    to_numbers = ['+2347056918098, +2348136800327', '+2349077499434']
+                    to_numbers = ['+2347056918098', '+2348136800327', '+2349077499434']
                     client = Client()
                     body = f"""NEW ORDER\nMerchant name: {user['firstname']} {user['lastname']}\nBusiness name: {user['businessname']}\nMerchant phone number: {user['phone']}\nPickup city: {obj.pickup_state}\nPickup address: {obj.pickup_address}\nPickup date: {obj.pickup_time}\nDestination city: {obj.destination_state}\nDestination address: {obj.destination_address}\nReceiver's name: {obj.customer_name}\nReceiver's phone number: {obj.customer_phone}\nNo of items to be shipped: {obj.number_of_items}\nAmount paid: {obj.amount_paid}\nShipping type: {obj.shipping_type}
                             """
