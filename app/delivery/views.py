@@ -1,8 +1,10 @@
+from decimal import Clamped
 from rest_framework import views, viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
+from twilio.rest import Client
 from user.utils import get_user_data, get_user_store_orders
 from .shipping_fee.shipping import calculate_shipping_fee
 from .utils import split_datetime_object
@@ -134,27 +136,28 @@ class VerifyTransaction(views.APIView):
         if ref is not None:
             self.url = self.url + ref
             headers_dict = {'Authorization': "Bearer {}".format(
-                os.environ.get('PAYSTACK_SECRET_KEY'))}
+                os.environ.get('PAYSTACK_TEST_SECRET_KEY'))}
 
             try:
                 r = requests.get(self.url, headers=headers_dict)
                 response = r.json()
 
                 if response['status']:
-                    delivery = OffStoreDelivery.objects.get(
+                    obj = OffStoreDelivery.objects.get(
                         transaction_reference=ref)
-                    delivery.status = 'PENDING'
-                    delivery.amount_paid = float(
+                    obj.status = 'PENDING'
+                    obj.amount_paid = float(
                         response['data']['amount']) / 100
-                    delivery.save()
-                    # if serializer.is_valid():
-                    #     if OffStoreDelivery.objects.filter(transaction_reference=ref).count() < 1:
-                    #         serializer.save()
-                    #     else:
-                    #         return Response({'success': False, 'errors': "Delivery exists and previously paid for"}, status=status.HTTP_400_BAD_REQUEST)
-                    # else:
-                    #     return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                    obj.save()
 
+                    user = get_user_data(obj.business_id)
+                    from_whatsapp_number = 'whatsapp:+14155238886'
+                    to_numbers = ['+2347056918098, +2348136800327', '+2349077499434']
+                    client = Client()
+                    body = f"""NEW ORDER\nMerchant name: {user['firstname']} {user['lastname']}\nBusiness name: {user['businessname']}\nMerchant phone number: {user['phone']}\nPickup city: {obj.pickup_state}\nPickup address: {obj.pickup_address}\nPickup date: {obj.pickup_time}\nDestination city: {obj.destination_state}\nDestination address: {obj.destination_address}\nReceiver's name: {obj.customer_name}\nReceiver's phone number: {obj.customer_phone}\nNo of items to be shipped: {obj.number_of_items}\nAmount paid: {obj.amount_paid}\nShipping type: {obj.shipping_type}
+                            """
+                    for number in to_numbers:
+                        client.messages.create(to=number, from_=from_whatsapp_number, body=body)
                     if response['data']['status'] == 'success':
                         return Response({'success': True}, status=status.HTTP_200_OK)
 
