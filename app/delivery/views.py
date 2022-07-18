@@ -157,7 +157,8 @@ class VerifyTransaction(views.APIView):
                     body = f"""NEW ORDER\nMerchant name: {user['firstname']} {user['lastname']}\nBusiness name: {user['businessname']}\nMerchant phone number: {user['phone']}\nPickup city: {obj.pickup_state}\nPickup address: {obj.pickup_address}\nPickup date: {obj.pickup_time}\nDestination city: {obj.destination_state}\nDestination address: {obj.destination_address}\nReceiver's name: {obj.customer_name}\nReceiver's phone number: {obj.customer_phone}\nNo of items to be shipped: {obj.number_of_items}\nAmount paid: {obj.amount_paid}\nShipping type: {obj.shipping_type}
                             """
                     for number in to_numbers:
-                        client.messages.create(to=number, from_=from_whatsapp_number, body=body)
+                        client.messages.create(to=f'whatsapp:{number}', from_=from_whatsapp_number, body=body)
+
                     if response['data']['status'] == 'success':
                         return Response({'success': True}, status=status.HTTP_200_OK)
 
