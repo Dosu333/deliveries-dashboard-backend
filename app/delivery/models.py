@@ -37,6 +37,7 @@ class OffStoreDelivery(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, null=True, blank=True, default='AWAITING PAYMENT')
     shipping_type = models.CharField(max_length=20, choices=SHIPPING_TYPE_CHOICES, null=True, blank=True, default='NORMAL')
     transaction_reference = models.CharField(max_length=225, blank=True, null=True, default=uuid.uuid4, unique=True)
+    delivery_date = models.CharField(max_length=225, blank=True, null=True)
     pickup_time = models.DateField(blank=True, null=True)
     dispatched_at = models.DateTimeField(blank=True, null=True)
     intransit_at = models.DateTimeField(blank=True, null=True)

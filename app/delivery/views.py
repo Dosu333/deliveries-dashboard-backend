@@ -12,6 +12,7 @@ from .models import *
 from .serializers import *
 import os
 import requests
+import datetime
 
 
 class GetShippingFee(views.APIView):
@@ -109,14 +110,26 @@ class UpdateOffstoreDeliveryView(views.APIView):
                     obj.amount_paid = float(amount)/100
                     obj.save()
 
-                    user = get_user_data(obj.business_id)
-                    from_whatsapp_number = 'whatsapp:+14155238886'
-                    to_numbers = ['+2347056918098', '+2348136800327', '+2349077499434']
-                    client = Client()
-                    body = f"""NEW ORDER\nMerchant name: {user['firstname']} {user['lastname']}\nBusiness name: {user['businessname']}\nMerchant phone number: {user['phone']}\nPickup city: {obj.pickup_state}\nPickup address: {obj.pickup_address}\nPickup date: {obj.pickup_time}\nDestination city: {obj.destination_state}\nDestination address: {obj.destination_address}\nReceiver's name: {obj.customer_name}\nReceiver's phone number: {obj.customer_phone}\nNo of items to be shipped: {obj.number_of_items}\nAmount paid: {obj.amount_paid}\nShipping type: {obj.shipping_type}
-                            """
-                    for number in to_numbers:
-                        client.messages.create(to=f'whatsapp:{number}', from_=from_whatsapp_number, body=body)
+                    # user = get_user_data(obj.business_id)
+
+                    # if str(obj.pickup_state).lower() == str(obj.destination_state):
+                    #     eta = obj.pickup_time + datetime.timedelta(days=3)
+                    # else:
+                    #     eta = obj.pickup_time + datetime.timedelta(days=5)
+
+                    # print(eta)
+
+                    # from_number = '+12312625574'
+                    # admin_to_numbers = ['+2347056918098', '+2348136800327', '+2349077499434']
+                    # customer_to_number = '+234' + str(obj.customer_phone).lstrip('0')
+
+                    # admin_body = f"""NEW ORDER\nMerchant name: {user['firstname']} {user['lastname']}\nBusiness name: {user['businessname']}\nMerchant phone number: {user['phone']}\nPickup city: {obj.pickup_state}\nPickup address: {obj.pickup_address}\nPickup date: {obj.pickup_time}\nDestination city: {obj.destination_state}\nDestination address: {obj.destination_address}\nReceiver's name: {obj.customer_name}\nReceiver's phone number: {obj.customer_phone}\nNo of items to be shipped: {obj.number_of_items}\nAmount paid: {obj.amount_paid}\nShipping type: {obj.shipping_type}
+                    #         """
+                    # customer_body = f"Hi, this is Rotimi from Boxin. Boxin is a logistics company that works with {str(user['businessname']).capitalize()}. We will be picking up your order from {str(user['businessname']).capitalize()} and it will be delivered to you on {{3}} at the latest."
+                    # client = Client()
+
+                    # for number in admin_to_numbers:
+                    #     client.messages.create(to=number, from_=from_number, body=admin_body)
 
                 return Response({'success': True}, status=status.HTTP_200_OK)
             return Response({'success': False, 'error': 'No transaction references'}, status=status.HTTP_400_BAD_REQUEST)
