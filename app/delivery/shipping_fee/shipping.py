@@ -42,14 +42,14 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
 
     elif (merchant_state.lower() == receiver_state.lower()) and (merchant_state in intrastate_states):
         if merchant_state.lower() == 'oshogbo':
-            return {'success': True, 'fee':850}
+            return {'success': True, 'fee':800}
         elif merchant_state.lower() in ['ife', 'ibadan']:
             distance = distance_matrix(merchant_address=merchant_address, consumer_address=receiver_address)
             if distance:
-                fee = distance * 80
+                fee = distance * 70
                 if float(total_weight) > 3:
                     extra_weight = (float(total_weight) / 3) - 1
-                    extra_fee = extra_weight * 150
+                    extra_fee = extra_weight * 100
                     fee += extra_fee
 
                 if shipping_type == 'EXPRESS':
