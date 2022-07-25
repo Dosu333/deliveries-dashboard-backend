@@ -66,4 +66,4 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
                 
             return {'success': True, 'fee':850}
     else:
-        return {'success': True, 'fee': price[0] + (0.1*price[0])}
+        return {'success': True, 'fee': 1200}
