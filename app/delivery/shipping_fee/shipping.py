@@ -59,9 +59,9 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
                     return {'success': True, 'fee': 500, 'actual': fee}
 
                 elif fee > 1000 and merchant_state.lower() == 'ife':
-                    return {'success': True, 'fee': 1000, 'actual': fee}
+                    return {'success': True, 'fee': 1500, 'actual': fee}
                 elif fee > 2000 and merchant_state.lower() == 'ibadan':
-                    return {'success': True, 'fee': 2000, 'actual': fee}
+                    return {'success': True, 'fee': 1500, 'actual': fee}
                 return {'success': True, 'fee': round(fee, -1), 'actual': fee}
                 
             return {'success': True, 'fee':850}
