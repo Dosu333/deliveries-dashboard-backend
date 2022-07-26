@@ -30,8 +30,6 @@ class GetShippingFee(views.APIView):
 
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                print(request.data['merchant_state'])
-                print(request.data['merchant_state'].lower())
                 fee = calculate_shipping_fee(
                     total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'])
 

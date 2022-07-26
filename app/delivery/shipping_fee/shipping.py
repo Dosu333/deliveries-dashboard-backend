@@ -26,8 +26,7 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
         if shipping_type == 'NORMAL': 
             if (merchant_state.lower() in ['lagos(mainland)', 'lagos(island)']) and (receiver_state.lower() in ['lagos(mainland)', 'lagos(island)']):
                 return {'success': True, 'fee': 2500}
-
-            zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.upper(), receiver_state.upper()].tolist()
+            zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.split('(')[0].upper(), receiver_state.split('(')[0].upper()].tolist()
             try:
                 price = pricing_df.loc[pricing_df['Weight']==total_weight, 'ZONE ' + str(zone[0])].tolist()
             except:
@@ -36,7 +35,7 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
                 extra_weight = float(10.0) - float(total_weight)
                 extra_price = extra_weight * extra_weight_rate
                 price += extra_price
-            return {'success': True, 'fee': price[0] + (0.1*price[0])}
+            return {'success': True, 'fee': price[0] + (0.03*price[0])}
 
     elif merchant_state.lower() == receiver_state.lower():
         if merchant_state.lower() in ['ife', 'ibadan']:
