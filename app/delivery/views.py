@@ -22,23 +22,25 @@ class GetShippingFee(views.APIView):
     serializer_class = ShippingVariablesSerializer
 
     def post(self, request, *args, **kwargs):
-        try:
-            items = request.data.get('items', None)
-            if not items:
-                merchant_address = request.data.get('merchant_address', None)
-                receiver_address = request.data.get('receiver_address', None)
+        # try:
+        items = request.data.get('items', None)
+        if not items:
+            merchant_address = request.data.get('merchant_address', None)
+            receiver_address = request.data.get('receiver_address', None)
 
-                serializer = self.serializer_class(data=request.data)
-                if serializer.is_valid():
-                    fee = calculate_shipping_fee(
-                        total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'])
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                print(request.data['merchant_state'])
+                print(request.data['merchant_state'].lower())
+                fee = calculate_shipping_fee(
+                    total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'])
 
-                    if fee['success']:
-                        return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
-                    return Response({'success': False, 'shipping_fee': fee['fee'], 'error': fee['message']}, status=status.HTTP_200_OK)
-                return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                if fee['success']:
+                    return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
+                return Response({'success': False, 'shipping_fee': fee['fee'], 'error': fee['message']}, status=status.HTTP_200_OK)
+            return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        # except Exception as e:
+        #     return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TrackDeliveryView(views.APIView):

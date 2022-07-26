@@ -22,21 +22,20 @@ def distance_matrix(merchant_address, consumer_address):
 
 
 def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchant_address, receiver_address, shipping_type='NORMAL'):
-    zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.upper(), receiver_state.upper()].tolist()
-    
-    try:
-        price = pricing_df.loc[pricing_df['Weight']==total_weight, 'ZONE ' + str(zone[0])].tolist()
-    except:
-        price = pricing_df.loc[pricing_df['Weight']==10, 'ZONE ' + str(zone[0])].tolist()
-        extra_weight_rate = add_price_df[f'ZONE {zone[0]}']
-        extra_weight = float(10.0) - float(total_weight)
-        extra_price = extra_weight * extra_weight_rate
-        price += extra_price
-
     if merchant_state.lower() != receiver_state.lower():
         if shipping_type == 'NORMAL': 
-            if merchant_state.lower() in ['lagos(mainland)', 'lagos(island)'] and receiver_state.lower() in ['lagos(mainland), lagos(island)']:
+            if (merchant_state.lower() in ['lagos(mainland)', 'lagos(island)']) and (receiver_state.lower() in ['lagos(mainland)', 'lagos(island)']):
                 return {'success': True, 'fee': 2500}
+
+            zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.upper(), receiver_state.upper()].tolist()
+            try:
+                price = pricing_df.loc[pricing_df['Weight']==total_weight, 'ZONE ' + str(zone[0])].tolist()
+            except:
+                price = pricing_df.loc[pricing_df['Weight']==10, 'ZONE ' + str(zone[0])].tolist()
+                extra_weight_rate = add_price_df[f'ZONE {zone[0]}']
+                extra_weight = float(10.0) - float(total_weight)
+                extra_price = extra_weight * extra_weight_rate
+                price += extra_price
             return {'success': True, 'fee': price[0] + (0.1*price[0])}
 
     elif merchant_state.lower() == receiver_state.lower():
