@@ -64,4 +64,3 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
         elif merchant_state.lower() == 'oshogbo':
             return {'success': True, 'fee':800}
         return {'success':True, 'fee':1500}
-        
