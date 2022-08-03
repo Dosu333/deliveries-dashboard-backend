@@ -2,7 +2,7 @@
 
 ## run `docker-compose build`
 
-## run `docker-compose up`
+## run `docker-compose up` include `-d` to run in detached mode
 
 Access the doc on
 
