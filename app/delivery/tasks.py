@@ -9,13 +9,16 @@ import datetime
 def send_alert_updates(delivery_object):
     user = get_user_data(delivery_object['business_id'])
     pickup_time = datetime.datetime.strptime(delivery_object['pickup_time'], '%Y-%m-%d')
-
-    if delivery_object['pickup_state'].lower() == delivery_object['destination_state'].lower():
-        eta = pickup_time + datetime.timedelta(days=1)
-    else:
-        eta = pickup_time + datetime.timedelta(days=5)
+    eta = datetime.datetime.strptime(delivery_object['delivery_date'].split('-')[1].lstrip(), '%d/%m/%Y')
 
     pickup_eta = pickup_time + datetime.timedelta(days=1)
+
+    if pickup_eta.weekday() == 6:
+        pickup_eta = pickup_eta + datetime.timedelta(days=1)
+
+    if eta.weekday() == 6:
+        eta = eta + datetime.timedelta(days=1)
+
     delivery_date = eta.strftime('%A, %d/%m/%Y')
     delivery_day = eta.strftime('%A')
     date_delivery = eta.strftime('%d/%m/%Y')
