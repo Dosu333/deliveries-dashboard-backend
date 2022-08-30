@@ -35,7 +35,7 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
                 extra_weight = float(10.0) - float(total_weight)
                 extra_price = extra_weight * extra_weight_rate
                 price += extra_price
-            return {'success': True, 'fee': price[0] + (0.03*price[0])}
+            return {'success': True, 'fee': round(price[0] + (0.03*price[0]), -1)}
 
     elif merchant_state.lower() == receiver_state.lower():
         if merchant_state.lower() in ['ife', 'ibadan']:
