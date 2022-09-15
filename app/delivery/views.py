@@ -149,18 +149,17 @@ class VerifyTransaction(views.APIView):
                 response = r.json()
 
                 if response['status']:
-                    obj = OffStoreDelivery.objects.get(
+                    if response['data']['status'] == 'success':
+                        obj = OffStoreDelivery.objects.get(
                         transaction_reference=ref)
 
-                    if obj.status == 'AWAITING PAYMENT':
-                        obj.status = 'PENDING'
-                        obj.amount_paid = float(
-                            response['data']['amount']) / 100
-                        obj.save()
-                        delivery_object = OffStoreDeliverySerializer(obj).data
-                        send_alert_updates.delay(delivery_object)
-
-                    if response['data']['status'] == 'success':
+                        if obj.status == 'AWAITING PAYMENT':
+                            obj.status = 'PENDING'
+                            obj.amount_paid = float(
+                                response['data']['amount']) / 100
+                            obj.save()
+                            delivery_object = OffStoreDeliverySerializer(obj).data
+                            send_alert_updates.delay(delivery_object)
                         return Response({'success': True}, status=status.HTTP_200_OK)
 
                     return Response({'success': False}, status=status.HTTP_200_OK)
