@@ -8,3 +8,6 @@ class OffstoreDeliveryAdmin(admin.ModelAdmin):
 
 admin.site.register(OffStoreDelivery, OffstoreDeliveryAdmin)
 admin.site.register(DeliveryRate)
+admin.site.register(APIDelivery)
+admin.site.register(LogisticsCompany)
+admin.site.register(AvailableLogisticsForOrder)

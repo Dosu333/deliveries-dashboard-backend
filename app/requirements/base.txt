@@ -42,4 +42,5 @@ fcm-django
 pandas
 numpy
 openpyxl
+djangorestframework-api-key
 # django-debug-toolbar==3.2.4

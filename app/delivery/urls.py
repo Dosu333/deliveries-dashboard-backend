@@ -14,5 +14,6 @@ urlpatterns = [
     path('instore/', GetStoreDeliveriesView.as_view(), name='deliveries'),
     path('shipping-fee/', GetShippingFee.as_view(), name='shipping-fee'),
     path('track/', TrackDeliveryView.as_view(), name='track'),
-    path('update-offstordelivery/', UpdateOffstoreDeliveryView.as_view(), name='update-offstoredelivery')
+    path('update-offstordelivery/', UpdateOffstoreDeliveryView.as_view(), name='update-offstoredelivery'),
+    path('rates/', GetRatesAPIView.as_view(), name='rates')
 ]
