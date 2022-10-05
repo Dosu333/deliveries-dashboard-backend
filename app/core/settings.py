@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'core.celery.CeleryConfig',
     'user',
     'delivery',
+    'wallet'
 ]
 
 AUTH_USER_MODEL = "user.User"
