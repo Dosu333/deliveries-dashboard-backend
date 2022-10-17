@@ -152,14 +152,15 @@ class VerifyTransaction(views.APIView):
                 if response['status']:
                     if response['data']['status'] == 'success':
                         obj = OffStoreDelivery.objects.get(
-                        transaction_reference=ref)
+                            transaction_reference=ref)
 
                         if obj.status == 'AWAITING PAYMENT':
                             obj.status = 'PENDING'
                             obj.amount_paid = float(
                                 response['data']['amount']) / 100
                             obj.save()
-                            delivery_object = OffStoreDeliverySerializer(obj).data
+                            delivery_object = OffStoreDeliverySerializer(
+                                obj).data
                             send_alert_updates.delay(delivery_object)
                         return Response({'success': True}, status=status.HTTP_200_OK)
 
@@ -171,7 +172,6 @@ class VerifyTransaction(views.APIView):
         return Response({'success': False, 'error': 'no ref'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class GetRatesAPIView(views.APIView):
     """This endpoint creates an order and returns the order id and the logistics companies that can service the orders with their respective rates and ETA"""
     serializer_class = APIDeliverySerializer
@@ -181,15 +181,21 @@ class GetRatesAPIView(views.APIView):
 
         if serializer.is_valid():
             instance = serializer.save()
-            available_logistics = LogisticsCompany.objects.filter(Q(serviceable_pickup_cities__contains=[str(instance.pickup_state).lower()]) & Q(serviceable_dropoff_cities__contains=[str(instance.destination_state).lower()]))
-            available_logistics_data = LogisticsCompanySerializer(available_logistics, many=True).data
+            available_logistics = LogisticsCompany.objects.filter(Q(serviceable_pickup_cities__contains=[str(
+                instance.pickup_state).lower()]) & Q(serviceable_dropoff_cities__contains=[str(instance.destination_state).lower()]))
+            available_logistics_data = LogisticsCompanySerializer(
+                available_logistics, many=True).data
 
             for company in available_logistics:
-                fee = calculate_shipping_rates(merchant_address=instance.pickup_address, merchant_state=instance.pickup_state, receiver_address=instance.destination_address, receiver_state=instance.destination_state, total_weight=instance.total_weight, logistics_company=company.name)
-                AvailableLogisticsForOrder.objects.create(logistics_company=company, total_fee=fee['fee'], order=instance)
+                fee = calculate_shipping_rates(merchant_address=instance.pickup_address, merchant_state=instance.pickup_state, receiver_address=instance.destination_address,
+                                               receiver_state=instance.destination_state, total_weight=instance.total_weight, logistics_company=company.name)
+                AvailableLogisticsForOrder.objects.create(
+                    logistics_company=company, total_fee=fee['fee'], order=instance)
 
-            logistics = AvailableLogisticsForOrder.objects.filter(order=instance)
-            available_logistics_data = AvailableLogisticsCompanySerializer(logistics, many=True).data
+            logistics = AvailableLogisticsForOrder.objects.filter(
+                order=instance)
+            available_logistics_data = AvailableLogisticsCompanySerializer(
+                logistics, many=True).data
 
             data = {
                 'order_id': instance.id,

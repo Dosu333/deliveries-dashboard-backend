@@ -71,7 +71,7 @@ class APIDelivery(models.Model):
     pickup_address = models.CharField(max_length=225)
     pickup_state = models.CharField(max_length=225)
     total_weight = models.DecimalField(max_digits=4, decimal_places=1, default=0.0)
-    company_id = models.UUIDField(blank=True, null=True)
+    business_id = models.UUIDField(blank=True, null=True)
     logistics_company_code = models.CharField(max_length=3, null=True, blank=True)
     merchant_name = models.CharField(max_length=225, null=True, blank=True)
     merchant_number = models.CharField(max_length=14, null=True, blank=True)

@@ -7,11 +7,12 @@ class EcommerceStore(models.Model):
     business_name = models.CharField(max_length=225, blank=True, null=True)
     merchant_firstname = models.CharField(max_length=225, blank=True, null=True)
     merchant_lastname = models.CharField(max_length=225, blank=True, null=True)
-    phone = models.CharField(max_length=14, blank=True, null=True)
+    merchant_phone = models.CharField(max_length=14, blank=True, null=True)
+    merchant_email = models.EmailField(blank=True, null=True)
     associated_company_id = models.CharField(max_length=225, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return self.business_name
 
 class Wallet(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
@@ -21,8 +22,9 @@ class Wallet(models.Model):
     account_number = models.CharField(max_length=10, null=True, blank=True)
     bank = models.CharField(max_length=255, blank=True, null=True)
     customer_code = models.CharField(max_length=255, blank=True, null=True)
-    virtual_bank_account = models.CharField(max_length=10, blank=True, null=True)
+    virtual_account_number = models.CharField(max_length=10, blank=True, null=True)
     virtual_bank = models.CharField(max_length=225, blank=True, null=True)
+    virtual_bank_account_name = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.store_name
