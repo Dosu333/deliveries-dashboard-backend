@@ -32,7 +32,7 @@ class GetShippingFee(views.APIView):
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 fee = calculate_shipping_fee(
-                    total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'], logistics_company='speedaf')
+                    total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'])
 
                 if fee['success']:
                     return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
