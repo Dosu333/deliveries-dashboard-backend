@@ -67,8 +67,10 @@ class APIDelivery(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     delivery_type = models.CharField(max_length=10, default='api')
     destination_address = models.CharField(max_length=225)
+    destination_address_postal_code = models.CharField(max_length=225)
     destination_state = models.CharField(max_length=225)
     pickup_address = models.CharField(max_length=225)
+    pick_up_address_postal_code = models.CharField(max_length=225)
     pickup_state = models.CharField(max_length=225)
     total_weight = models.DecimalField(max_digits=4, decimal_places=1, default=0.0)
     business_id = models.UUIDField(blank=True, null=True)
@@ -140,4 +142,4 @@ class AvailableLogisticsForOrder(models.Model):
     total_fee = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return self.name
+        return self.logistics_company.name

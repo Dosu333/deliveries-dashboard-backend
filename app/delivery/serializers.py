@@ -118,6 +118,6 @@ class TrackDeliverySerializer(serializers.Serializer):
     def validate(self, attrs):
         request_from = attrs.get('type', None)
 
-        if request_from and request_from not in ['store', 'offstore']:
+        if request_from and request_from not in ['store', 'offstore', 'api']:
             raise serializers.ValidationError('Invalid delivery type.')
         return super().validate(attrs)

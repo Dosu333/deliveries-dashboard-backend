@@ -13,6 +13,8 @@ from .utils import split_datetime_object
 from .models import *
 from .serializers import *
 from .tasks import send_alert_updates
+from rest_framework_api_key.permissions import HasAPIKey
+from rest_framework_api_key.models import APIKey
 import os
 import requests
 import datetime
@@ -32,7 +34,7 @@ class GetShippingFee(views.APIView):
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 fee = calculate_shipping_fee(
-                    total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'], logistics_company='speedaf')
+                    total_weight=request.data['weight'], merchant_state=request.data['merchant_state'], receiver_state=request.data['receiver_state'], merchant_address=merchant_address, receiver_address=receiver_address, shipping_type=request.data['shipping_type'])
 
                 if fee['success']:
                     return Response({'success': True, 'shipping_fee': fee['fee']}, status=status.HTTP_200_OK)
@@ -58,6 +60,16 @@ class TrackDeliveryView(views.APIView):
                     delivery = OffStoreDelivery.objects.get(
                         id=str(serializer.data['delivery_id']))
                     delivey_data = OffStoreDeliverySerializer(delivery).data
+
+                    for checkpoint in checkpoint_data:
+                        checkpoints.append(
+                            {'status': checkpoint[:-3], 'date_time': delivey_data[checkpoint]})
+                    return Response({'success': True, 'checkpoints': checkpoints}, status=status.HTTP_200_OK)
+
+                if serializer.data['type'] == 'api':
+                    delivery = APIDelivery.objects.get(
+                        id=str(serializer.data['delivery_id']))
+                    delivey_data = APIDeliverySerializer(delivery).data
 
                     for checkpoint in checkpoint_data:
                         checkpoints.append(
@@ -104,17 +116,32 @@ class UpdateOffstoreDeliveryView(views.APIView):
     def get(self, request, *args, **kwargs):
         ref = request.query_params.get('ref', None)
         amount = request.query_params.get('amount', None)
+        type = request.query_params.get('type', None)
+
         try:
             if ref:
-                obj = OffStoreDelivery.objects.get(
-                    transaction_reference=ref)
-                if obj.status == 'AWAITING PAYMENT':
-                    obj.status = 'PENDING'
-                    obj.amount_paid = float(amount)/100
-                    obj.save()
-                    delivery_object = OffStoreDeliverySerializer(obj).data
-                    send_alert_updates.delay(delivery_object)
-                return Response({'success': True}, status=status.HTTP_200_OK)
+                if type == 'offstore':
+                    obj = OffStoreDelivery.objects.get(
+                        transaction_reference=ref)
+                    if obj.status == 'AWAITING PAYMENT':
+                        obj.status = 'PENDING'
+                        obj.amount_paid = float(amount)/100
+                        obj.save()
+                        delivery_object = OffStoreDeliverySerializer(obj).data
+                        send_alert_updates.delay(delivery_object)
+                    return Response({'success': True}, status=status.HTTP_200_OK)
+                elif type == 'api':
+                    rate = AvailableLogisticsForOrder.objects.get(id=ref)
+                    rate.order.transaction_reference = ref
+                    rate.order.save()
+
+                    if rate.order.status == 'AWAITING PAYMENT' and float(amount)/100 >= float(rate.total_fee):
+                        rate.order.status = 'PENDING'
+                        rate.order.amount_paid = float(amount)/100
+                        rate.order.save()
+                        delivery_object = APIDeliverySerializer(obj).data
+                        send_alert_updates.delay(delivery_object)
+                    return Response({'success': True}, status=status.HTTP_200_OK)
             return Response({'success': False, 'error': 'No transaction references'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -175,12 +202,19 @@ class VerifyTransaction(views.APIView):
 class GetRatesAPIView(views.APIView):
     """This endpoint creates an order and returns the order id and the logistics companies that can service the orders with their respective rates and ETA"""
     serializer_class = APIDeliverySerializer
+    permission_classes = [HasAPIKey | IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
+            key = request.META["HTTP_AUTHORIZATION"].split()[1]
+            api_key = APIKey.objects.get_from_key(key)
+
             instance = serializer.save()
+            instance.business_id = api_key.name
+            instance.save()
+
             available_logistics = LogisticsCompany.objects.filter(Q(serviceable_pickup_cities__contains=[str(
                 instance.pickup_state).lower()]) & Q(serviceable_dropoff_cities__contains=[str(instance.destination_state).lower()]))
             available_logistics_data = LogisticsCompanySerializer(
@@ -188,9 +222,11 @@ class GetRatesAPIView(views.APIView):
 
             for company in available_logistics:
                 fee = calculate_shipping_rates(merchant_address=instance.pickup_address, merchant_state=instance.pickup_state, receiver_address=instance.destination_address,
-                                               receiver_state=instance.destination_state, total_weight=instance.total_weight, logistics_company=company.name)
-                AvailableLogisticsForOrder.objects.create(
-                    logistics_company=company, total_fee=fee['fee'], order=instance)
+                                               receiver_state=instance.destination_state, total_weight=instance.total_weight, logistics_company=company.name.lower())
+                
+                if fee['fee']:
+                    AvailableLogisticsForOrder.objects.create(
+                        logistics_company=company, total_fee=fee['fee'], order=instance)
 
             logistics = AvailableLogisticsForOrder.objects.filter(
                 order=instance)
@@ -201,6 +237,6 @@ class GetRatesAPIView(views.APIView):
                 'order_id': instance.id,
                 'available_logistics': available_logistics_data
             }
-            return Response({'success': True, 'data': data}, status=status.HTTP_200_OK)
+            return Response({'success': True, 'data': available_logistics_data}, status=status.HTTP_200_OK)
         return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_200_OK)
 

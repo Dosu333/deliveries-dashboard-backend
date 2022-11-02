@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'health_check.contrib.redis',
     # 'debug_toolbar',
     'rest_framework',
+    'rest_framework_api_key',
     'drf_spectacular',
     'core.celery.CeleryConfig',
     'user',
