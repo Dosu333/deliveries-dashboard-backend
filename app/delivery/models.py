@@ -114,6 +114,7 @@ class ItemsPicked(models.Model):
     order = models.ForeignKey(APIDelivery, on_delete=models.CASCADE, null=True, blank=True)
     weight = models.DecimalField(max_digits=4, decimal_places=2)
     quantity = models.IntegerField(default=1)
+    description = models.TextField(null=True, blank=True)
     name = models.CharField(max_length=225, null=True, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
