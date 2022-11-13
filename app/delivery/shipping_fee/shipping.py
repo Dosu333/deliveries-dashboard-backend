@@ -7,6 +7,23 @@ zoning_df = pd.read_excel(filepath, sheet_name=2)
 pricing_df = pd.read_excel(filepath, sheet_name=1)
 add_price_df = pd.read_excel(filepath, sheet_name=5)
 intrastate_states = ['ibadan', 'ife', 'oshogbo', 'lagos(mainland)', 'lagos(island)']
+speedaf_states = ['lagos', 'abuja', 'kaduna', 'kano', 'bauchi', 'calabar', 'katsina']
+
+def speedaf(merchant_state, receiver_state, total_weight):
+    stations = zoning_df['STATION NAME'].values
+    if merchant_state.upper() not in stations or receiver_state.upper() not in stations:
+        return None
+    zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.split('(')[0].upper(), receiver_state.split('(')[0].upper()].tolist()
+    try:
+        price = pricing_df.loc[pricing_df['Weight']==total_weight, 'ZONE ' + str(zone[0])].tolist()
+    except:
+        price = pricing_df.loc[pricing_df['Weight']==10, 'ZONE ' + str(zone[0])].tolist()
+        extra_weight_rate = add_price_df[f'ZONE {zone[0]}']
+        extra_weight = float(10.0) - float(total_weight)
+        extra_price = extra_weight * extra_weight_rate
+        price += extra_price
+
+    return price
 
 def distance_matrix(merchant_address, consumer_address):
     url = f"https://maps.googleapis.com/maps/api/distancematrix/json?origins={consumer_address}&destinations={merchant_address}&key={os.environ.get('GOOGLE_KEY')}"
@@ -66,50 +83,27 @@ def calculate_shipping_fee(merchant_state, receiver_state, total_weight, merchan
         return {'success':True, 'fee':1500}
 
 
-def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merchant_address, receiver_address, logistics_company, shipping_type='NORMAL'):
+def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merchant_address, receiver_address, merchant_city, receiver_city, logistics_company, shipping_type='NORMAL'):
     match logistics_company:
         case "speedaf":
-            if merchant_state.lower() != receiver_state.lower():
-                if shipping_type == 'NORMAL': 
-                    if (merchant_state.lower() in ['lagos(mainland)', 'lagos(island)']) and (receiver_state.lower() in ['lagos(mainland)', 'lagos(island)']):
-                        return {'success': True, 'fee': 2500}
-                    zone = zoning_df.loc[zoning_df['STATION NAME']==merchant_state.split('(')[0].upper(), receiver_state.split('(')[0].upper()].tolist()
-                    try:
-                        price = pricing_df.loc[pricing_df['Weight']==total_weight, 'ZONE ' + str(zone[0])].tolist()
-                    except:
-                        price = pricing_df.loc[pricing_df['Weight']==10, 'ZONE ' + str(zone[0])].tolist()
-                        extra_weight_rate = add_price_df[f'ZONE {zone[0]}']
-                        extra_weight = float(10.0) - float(total_weight)
-                        extra_price = extra_weight * extra_weight_rate
-                        price += extra_price
-                    return {'success': True, 'fee': round(price[0] + (0.03*price[0]), -1)}
+            if merchant_state.lower() in speedaf_states:
+                merchant_city = merchant_state.lower()
+            if receiver_state.lower() in speedaf_states:
+                receiver_city = receiver_state.lower()
 
-            elif merchant_state.lower() == receiver_state.lower():
-                if merchant_state.lower() in ['ife', 'ibadan']:
-                    distance = distance_matrix(merchant_address=merchant_address, consumer_address=receiver_address)
-                    if distance:
-                        fee = distance * 70
-                        if float(total_weight) > 3:
-                            extra_weight = (float(total_weight) / 3) - 1
-                            extra_fee = extra_weight * 100
-                            fee += extra_fee
+            price = speedaf(merchant_city, receiver_city, total_weight)
 
-                        if shipping_type == 'EXPRESS':
-                            fee += (0.1*fee)
-
-                        if fee < 500:
-                            return {'success': True, 'fee': 500, 'actual': fee}
-
-                        elif fee > 1000 and merchant_state.lower() == 'ife':
-                            return {'success': True, 'fee': 1500, 'actual': fee}
-                        elif fee > 2000 and merchant_state.lower() == 'ibadan':
-                            return {'success': True, 'fee': 1500, 'actual': fee}
-                        return {'success': True, 'fee': round(fee, -1), 'actual': fee}  
-                    return {'success': True, 'fee':850}
-                elif merchant_state.lower() == 'lagos(mainland)':
-                    return {'success': True, 'fee':1700}
-                elif merchant_state.lower() == 'oshogbo':
-                    return {'success': True, 'fee':800}
-                return {'success':True, 'fee':1500}
+            if price:
+                fee = round(price[0] + (0.03*price[0]), -1)
+            else:
+                fee = price
+                
+            if merchant_city.lower() != receiver_city.lower():
+                delivery_eta = "2 to 5 working days"
+            else:
+                delivery_eta = "1 to 2 working days"
+            return {'success': True, 'fee': fee, 'delivery_eta': delivery_eta}
         case "dhl":
-            return {'success': True, 'fee':4000}
+            return {'success': True, 'fee':4000, 'delivery_eta': "1 to 2 working days"}
+        case "topship":
+            pass

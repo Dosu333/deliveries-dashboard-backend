@@ -17,5 +17,6 @@ urlpatterns = [
     path('track/', TrackDeliveryView.as_view(), name='track'),
     path('update-offstordelivery/', UpdateOffstoreDeliveryView.as_view(), name='update-offstoredelivery'),
     path('rates/', GetRatesAPIView.as_view(), name='rates'),
+    path('pick-rate/', MakePaymentForAPIDeliveryView.as_view(), name='pick-rate'),
     path('generate-key/', GenerateAPIKey.as_view(), name='generate-key')
 ]

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.crypto import get_random_string
+from django.utils import timezone
+import datetime
 import uuid
 
 from numpy import maximum
@@ -69,9 +71,11 @@ class APIDelivery(models.Model):
     destination_address = models.CharField(max_length=225)
     destination_address_postal_code = models.CharField(max_length=225, null=True, blank=True)
     destination_state = models.CharField(max_length=225)
+    destination_city = models.CharField(max_length=225, blank=True, null=True)
     pickup_address = models.CharField(max_length=225)
     pick_up_address_postal_code = models.CharField(max_length=225, null=True, blank=True)
     pickup_state = models.CharField(max_length=225)
+    pickup_city = models.CharField(max_length=225, blank=True, null=True)
     total_weight = models.DecimalField(max_digits=4, decimal_places=1, default=0.0)
     business_id = models.UUIDField(blank=True, null=True)
     logistics_company_code = models.CharField(max_length=3, null=True, blank=True)
@@ -88,7 +92,8 @@ class APIDelivery(models.Model):
     transaction_reference = models.CharField(max_length=225, blank=True, null=True, default=uuid.uuid4, unique=True)
     tracking_id = models.CharField(max_length=225, blank=True, null=True)
     delivery_date = models.CharField(max_length=225, blank=True, null=True)
-    pickup_time = models.DateField(blank=True, null=True)
+    pickup_date = models.DateField(blank=True, null=True, default=timezone.now)
+    paid = models.BooleanField(default=False)
     dispatched_at = models.DateTimeField(blank=True, null=True)
     intransit_at = models.DateTimeField(blank=True, null=True)
     delivered_at = models.DateTimeField(blank=True, null=True)
@@ -140,7 +145,9 @@ class AvailableLogisticsForOrder(models.Model):
     rate_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(APIDelivery, on_delete=models.CASCADE)
     logistics_company = models.ForeignKey(LogisticsCompany, on_delete=models.CASCADE, null=True, blank=True)
+    delivery_duration = models.CharField(max_length=225, blank=True, null=True)
     total_fee = models.DecimalField(max_digits=10, decimal_places=2)
+    selected = models.BooleanField(default=False)
 
     def __str__(self):
         return self.logistics_company.name

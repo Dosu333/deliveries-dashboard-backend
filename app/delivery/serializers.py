@@ -33,7 +33,7 @@ class ItemPickedSerialaizer(serializers.ModelSerializer):
 
     class Meta:
         model = ItemsPicked
-        fields = ('__all__')
+        exclude = ['order', ]
 
 
 class LogisticsCompanySerializer(serializers.ModelSerializer):
@@ -45,7 +45,7 @@ class LogisticsCompanySerializer(serializers.ModelSerializer):
 class AvailableLogisticsCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = AvailableLogisticsForOrder
-        exclude = ['order']
+        exclude = ['order', 'selected']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -54,13 +54,12 @@ class AvailableLogisticsCompanySerializer(serializers.ModelSerializer):
         representation['logistics_company'] = logistics_company['name']
         representation['code'] = logistics_company['code']
         representation['image'] = logistics_company['image']
-        representation['pickup_eta'] = logistics_company['pickup_eta']
-        representation['delivery_eta'] = logistics_company['delivery_eta']
+        representation['pickup_eta'] = "Next working day"
         representation['tracking_url'] = logistics_company['tracking_url']
         return representation
 
 
-class APIDeliverySerializer(serializers.ModelSerializer):
+class ListAPIDeliverySerializer(serializers.ModelSerializer):
     order_placed_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
     # pickup_time = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     intransit_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", required=False)
@@ -71,6 +70,14 @@ class APIDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = APIDelivery
         fields = ('__all__')
+
+
+class CreateAPIDeliverySerializer(serializers.ModelSerializer):
+    itempicked = ItemPickedSerialaizer(many=True)
+
+    class Meta:
+        model = APIDelivery
+        exclude = ['delivery_type', 'total_weight', 'business_id', 'logistics_company_code', 'number_of_items', 'amount_paid', 'shipping_type', 'transaction_reference', 'tracking_id', 'delivery_date', 'paid', 'dispatched_at', 'intransit_at', 'delivered_at', 'status']
 
     def validate(self, attrs):
         email = attrs.get('customer_email', None)
@@ -94,13 +101,29 @@ class APIDeliverySerializer(serializers.ModelSerializer):
             total_weight = total_weight + (float(item['weight']) * float(item['quantity']))
             number_of_items = number_of_items + float(item['quantity'])
             ItemsPicked.objects.create(order=order, **item)
-        
+
+        total_weight = round(total_weight, 1)
+
+        while total_weight % 0.5 != 0:
+            print(total_weight)
+            total_weight = round(total_weight + 0.1, 1)
+
         order.total_weight = total_weight
         order.number_of_items = number_of_items
         order.save()
 
         return order
 
+
+class RatesSerializer(serializers.Serializer):
+    rate_id = serializers.UUIDField()
+
+    def validate(self, attrs):
+        rate_id = attrs['rate_id']
+
+        if not AvailableLogisticsForOrder.objects.filter(rate_id=str(rate_id)).exists():
+            raise serializers.ValidationError("Selected rate does not exist")
+        return super().validate(attrs)
 
 class ShippingVariablesSerializer(serializers.Serializer):
     merchant_state = serializers.CharField(required=True)

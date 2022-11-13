@@ -201,42 +201,60 @@ class VerifyTransaction(views.APIView):
 
 class GetRatesAPIView(views.APIView):
     """This endpoint creates an order and returns the order id and the logistics companies that can service the orders with their respective rates and ETA"""
-    serializer_class = APIDeliverySerializer
+    serializer_class = CreateAPIDeliverySerializer
     permission_classes = [HasAPIKey | IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
 
-        if serializer.is_valid():
-            key = request.META["HTTP_AUTHORIZATION"].split()[1]
-            api_key = APIKey.objects.get_from_key(key)
+        try:
+            if serializer.is_valid():
+                key = request.META["HTTP_AUTHORIZATION"].split()[1]
+                instance = serializer.save()
 
-            instance = serializer.save()
-            instance.business_id = api_key.name
-            instance.save()
+                try: 
+                    api_key = APIKey.objects.get_from_key(key)
+                    instance.business_id = api_key.name
+                except:
+                    instance.business_id = request.user.id
+                instance.save()
 
-            available_logistics = LogisticsCompany.objects.filter(Q(serviceable_pickup_cities__contains=[str(
-                instance.pickup_state).lower()]) & Q(serviceable_dropoff_cities__contains=[str(instance.destination_state).lower()]))
-            available_logistics_data = LogisticsCompanySerializer(
-                available_logistics, many=True).data
+                available_logistics = LogisticsCompany.objects.all()
 
-            for company in available_logistics:
-                fee = calculate_shipping_rates(merchant_address=instance.pickup_address, merchant_state=instance.pickup_state, receiver_address=instance.destination_address,
-                                               receiver_state=instance.destination_state, total_weight=instance.total_weight, logistics_company=company.name.lower())
-                
-                if fee['fee']:
-                    AvailableLogisticsForOrder.objects.create(
-                        logistics_company=company, total_fee=fee['fee'], order=instance)
+                for company in available_logistics:
+                    fee = calculate_shipping_rates(merchant_address=instance.pickup_address, merchant_state=instance.pickup_state, receiver_address=instance.destination_address, merchant_city=instance.pickup_city, receiver_city=instance.destination_city,
+                                                receiver_state=instance.destination_state, total_weight=instance.total_weight, logistics_company=company.name.lower())
+                    
+                    if fee['fee']:
+                        AvailableLogisticsForOrder.objects.create(
+                            logistics_company=company, total_fee=fee['fee'], order=instance, delivery_duration=fee['delivery_eta'])
 
-            logistics = AvailableLogisticsForOrder.objects.filter(
-                order=instance)
-            available_logistics_data = AvailableLogisticsCompanySerializer(
-                logistics, many=True).data
+                logistics = AvailableLogisticsForOrder.objects.filter(
+                    order=instance)
+                available_logistics_data = AvailableLogisticsCompanySerializer(
+                    logistics, many=True).data
+                return Response({'success': True, 'data': available_logistics_data}, status=status.HTTP_200_OK)
+            return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success':False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            data = {
-                'order_id': instance.id,
-                'available_logistics': available_logistics_data
-            }
-            return Response({'success': True, 'data': available_logistics_data}, status=status.HTTP_200_OK)
-        return Response({'success': False, 'error': serializer.errors}, status=status.HTTP_200_OK)
+
+class MakePaymentForAPIDeliveryView(views.APIView):
+    """This endpoint allows for a rate to be selected and paid for via wallet"""
+    queryset = AvailableLogisticsForOrder.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        rate = self.request.query_params.get('rate', None)
+
+        try:
+            if rate and self.queryset.filter(id=str(rate)).exists():
+                rate = self.queryset.get(id=str(rate))
+                rate.selected = True
+                rate.order.paid = True
+                rate.order.save()
+                rate.save()
+                return Response({'success': True, 'message': 'Payment successful'}, status=status.HTTP_200_OK)
+            return Response({'success':False, 'error': "Rate does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response ({'success':False, 'error':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
