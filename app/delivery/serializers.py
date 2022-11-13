@@ -105,7 +105,6 @@ class CreateAPIDeliverySerializer(serializers.ModelSerializer):
         total_weight = round(total_weight, 1)
 
         while total_weight % 0.5 != 0:
-            print(total_weight)
             total_weight = round(total_weight + 0.1, 1)
 
         order.total_weight = total_weight

@@ -1,5 +1,3 @@
-from decimal import Clamped
-from time import strftime
 from rest_framework import views, viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -69,7 +67,7 @@ class TrackDeliveryView(views.APIView):
                 if serializer.data['type'] == 'api':
                     delivery = APIDelivery.objects.get(
                         id=str(serializer.data['delivery_id']))
-                    delivey_data = APIDeliverySerializer(delivery).data
+                    delivey_data = ListAPIDeliverySerializer(delivery).data
 
                     for checkpoint in checkpoint_data:
                         checkpoints.append(
@@ -139,7 +137,7 @@ class UpdateOffstoreDeliveryView(views.APIView):
                         rate.order.status = 'PENDING'
                         rate.order.amount_paid = float(amount)/100
                         rate.order.save()
-                        delivery_object = APIDeliverySerializer(obj).data
+                        delivery_object = ListAPIDeliverySerializer(obj).data
                         send_alert_updates.delay(delivery_object)
                     return Response({'success': True}, status=status.HTTP_200_OK)
             return Response({'success': False, 'error': 'No transaction references'}, status=status.HTTP_400_BAD_REQUEST)
