@@ -101,7 +101,7 @@ def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merch
         case "speedaf":
             if merchant_state.lower() in speedaf_states:
                 merchant_city = merchant_state.lower()
-            elif 'ife' in merchant_city:
+            elif 'ife' in merchant_city.lower():
                 merchant_city = 'ife'
             if receiver_state.lower() in speedaf_states:
                 receiver_city = receiver_state.lower()
