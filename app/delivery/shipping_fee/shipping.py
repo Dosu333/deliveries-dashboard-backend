@@ -25,6 +25,19 @@ def speedaf(merchant_state, receiver_state, total_weight):
 
     return price
 
+def topship(merchant_state, receiver_state, total_weight):
+    topship_directory = f'{cwd}/delivery/shipping_fee/Topship.xlsx'
+    if merchant_state.lower() == 'lagos':
+        topship_df = pd.read_excel(topship_directory, sheet_name=0)
+        merchant_state = 'Lagos state'
+    elif merchant_state.lower() == 'abuja':
+        topship_df = pd.read_excel(topship_directory, sheet_name=1)
+        merchant_state = 'Abuja'
+    else:
+        return None
+    price = topship_df.loc[topship_df['States']==merchant_state].loc[topship_df['WEIGHT']==total_weight]['TOPSHIP STANDARD PRICE']
+
+
 def distance_matrix(merchant_address, consumer_address):
     url = f"https://maps.googleapis.com/maps/api/distancematrix/json?origins={consumer_address}&destinations={merchant_address}&key={os.environ.get('GOOGLE_KEY')}"
 
@@ -88,6 +101,8 @@ def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merch
         case "speedaf":
             if merchant_state.lower() in speedaf_states:
                 merchant_city = merchant_state.lower()
+            elif 'ife' in merchant_city:
+                merchant_city = 'ife'
             if receiver_state.lower() in speedaf_states:
                 receiver_city = receiver_state.lower()
 
