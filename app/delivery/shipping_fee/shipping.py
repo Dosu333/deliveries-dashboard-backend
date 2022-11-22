@@ -27,6 +27,7 @@ def speedaf(merchant_state, receiver_state, total_weight):
 
 def topship(merchant_state, receiver_state, total_weight):
     topship_directory = f'{cwd}/delivery/shipping_fee/Topship.xlsx'
+    receiver_state = receiver_state + ' state'
     if merchant_state.lower() == 'lagos':
         topship_df = pd.read_excel(topship_directory, sheet_name=0)
         merchant_state = 'Lagos state'
@@ -35,7 +36,16 @@ def topship(merchant_state, receiver_state, total_weight):
         merchant_state = 'Abuja'
     else:
         return None
-    price = topship_df.loc[topship_df['States']==merchant_state].loc[topship_df['WEIGHT']==total_weight]['TOPSHIP STANDARD PRICE']
+
+    if float(total_weight) <= float(2.0):
+        total_weight = '0-2kg'
+    elif float(total_weight) == float(3.0):
+        total_weight = '3kg '
+    else:
+        total_weight = str(total_weight) + 'kg'
+    price = topship_df.loc[topship_df['States']==receiver_state].loc[topship_df['WEIGHT']==total_weight]['TOPSHIP STANDARD PRICE']
+    delivery_eta = topship_df.loc[topship_df['States']==receiver_state].loc[topship_df['WEIGHT']==total_weight]['DELIVERY TIMELINE']
+    return (price.tolist()[0], delivery_eta.tolist()[0])
 
 
 def distance_matrix(merchant_address, consumer_address):
@@ -103,8 +113,11 @@ def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merch
                 merchant_city = merchant_state.lower()
             elif 'ife' in merchant_city.lower():
                 merchant_city = 'ife'
+
             if receiver_state.lower() in speedaf_states:
                 receiver_city = receiver_state.lower()
+            elif 'ife' in receiver_city.lower():
+                receiver_city = 'ife'
 
             price = speedaf(merchant_city, receiver_city, total_weight)
 
@@ -121,4 +134,12 @@ def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merch
         case "dhl":
             return {'success': True, 'fee':4000, 'delivery_eta': "1 to 2 working days"}
         case "topship":
-            pass
+            price = topship(merchant_state, receiver_state, total_weight)
+
+            if price:
+                fee = round(float(price[0]) + (0.03*float(price[0])), -1)
+                delivery_eta = price[1]
+            else:
+                fee = price
+                delivery_eta = None
+            return {'success': True, 'fee': fee, 'delivery_eta': delivery_eta}
