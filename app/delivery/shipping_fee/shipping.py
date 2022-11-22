@@ -35,7 +35,16 @@ def topship(merchant_state, receiver_state, total_weight):
         merchant_state = 'Abuja'
     else:
         return None
+
+    if float(total_weight) <= float(2.0):
+        total_weight = '0-2kg'
+    elif float(total_weight) == float(3.0):
+        total_weight = '3kg '
+    else:
+        total_weight = str(total_weight) + 'kg'
     price = topship_df.loc[topship_df['States']==merchant_state].loc[topship_df['WEIGHT']==total_weight]['TOPSHIP STANDARD PRICE']
+    delivery_eta = topship_df.loc[topship_df['States']==merchant_state].loc[topship_df['WEIGHT']==total_weight]['DELIVERY TIMELINE']
+    return (price.tolist()[0], delivery_eta)
 
 
 def distance_matrix(merchant_address, consumer_address):
@@ -121,4 +130,12 @@ def calculate_shipping_rates(merchant_state, receiver_state, total_weight, merch
         case "dhl":
             return {'success': True, 'fee':4000, 'delivery_eta': "1 to 2 working days"}
         case "topship":
-            pass
+            price = topship(merchant_state, receiver_state, total_weight)
+
+            if price:
+                fee = round(float(price[0]) + (0.03*float(price[0])), -1)
+                delivery_eta = price[1]
+            else:
+                fee = price
+                delivery_eta = None
+            return {'success': True, 'fee': fee, 'delivery_eta': delivery_eta}
